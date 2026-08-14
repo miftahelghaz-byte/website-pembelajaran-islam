@@ -108,3 +108,42 @@ init();
 setupCompetencyMenu();
 setupCommentSection();
 ['Dasar', 'Menengah', 'Lanjutan'].forEach(level => $('#levelFilter').insertAdjacentHTML('beforeend', `<option value="${level}">${level}</option>`));
+// ============================================
+// KODE INI DITAMBAHKAN KE PALING BAWAH file app.js
+// (setelah semua kode yang sudah ada, sebelum baris renderCategories() dipanggil pertama kali)
+// ============================================
+
+const SUPABASE_URL = 'https://kgmqarcsqxodksfhkfgz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtnbXFhcmNzcXhvZGtzZmhrZmd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3MjUyOTMsImV4cCI6MjEwMjMwMTI5M30.tl0-vqDrhddtXuOIk22qru_JrLHTTuODc-EJ-HFuyQw'; // ambil di Supabase > Project Settings > API > anon public key
+
+async function loadFromSupabase() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/materi?select=*`, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    const rows = await res.json();
+
+    rows.forEach(row => {
+      courses.push({
+        title: row.title,
+        cat: row.kategori,
+        icon: row.icon || '✦',
+        desc: row.deskripsi || '',
+        level: row.level || 'Pemula',
+        modules: row.modules || [],
+        readings: row.readings || [],
+        quiz: row.quiz || []
+      });
+    });
+
+    renderCategories();
+    renderCourses();
+  } catch (err) {
+    console.error('Gagal memuat data dari Supabase:', err);
+  }
+}
+
+loadFromSupabase();
